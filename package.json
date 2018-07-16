@@ -1,0 +1,189 @@
+{
+  "name": "vscode-transmit",
+  "displayName": "Transmit",
+  "description": "Adds a few commands for interacting with Transmit.",
+  "icon": "resources/logo-128x128.png",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "out/src/extension.js",
+  "publisher": "fabiospampinato",
+  "activationEvents": [
+    "*"
+  ],
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Transmit - Configuration",
+      "properties": {
+        "transmit.favorite": {
+          "type": "string",
+          "description": "Name of the Transmit favorite to use",
+          "default": ""
+        },
+        "transmit.domain": {
+          "type": "string",
+          "description": "Domain to connect to (e.g. example.com)",
+          "default": ""
+        },
+        "transmit.user": {
+          "type": "string",
+          "description": "User used in the connection",
+          "default": "root"
+        },
+        "transmit.protocol": {
+          "type": "string",
+          "enum": [
+            "FTP",
+            "FTP implicit SSL",
+            "FTP TLS SSL",
+            "S3",
+            "SFTP",
+            "WebDAV",
+            "WebDAV HTTPS",
+            "Azure",
+            "B2",
+            "Box",
+            "Cloud Drive",
+            "Cloud Files",
+            "DreamObjects",
+            "Dropbox",
+            "Google Drive",
+            "OneDrive",
+            "OneDrive for Business",
+            "OpenStack Swift"
+          ],
+          "description": "Protocol used in the connection",
+          "default": "SFTP"
+        },
+        "transmit.localRoot": {
+          "type": "string",
+          "description": "Local root path",
+          "default": ""
+        },
+        "transmit.remoteRoot": {
+          "type": "string",
+          "description": "Remote root path",
+          "default": ""
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "transmit.connect",
+        "title": "Transmit: Connect"
+      },
+      {
+        "command": "transmit.upload",
+        "title": "Transmit: Upload"
+      },
+      {
+        "command": "transmit.uploadContext",
+        "title": "Upload"
+      },
+      {
+        "command": "transmit.download",
+        "title": "Transmit: Download"
+      },
+      {
+        "command": "transmit.downloadContext",
+        "title": "Download"
+      },
+      {
+        "command": "transmit.synchronize",
+        "title": "Transmit: Synchronize"
+      },
+      {
+        "command": "transmit.synchronizeContext",
+        "title": "Synchronize"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "transmit.uploadContext",
+          "when": "false"
+        },
+        {
+          "command": "transmit.downloadContext",
+          "when": "false"
+        },
+        {
+          "command": "transmit.synchronizeContext",
+          "when": "false"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "transmit.uploadContext",
+          "group": "transmit",
+          "when": "isTransmitEnabled"
+        },
+        {
+          "command": "transmit.downloadContext",
+          "group": "transmit",
+          "when": "isTransmitEnabled"
+        },
+        {
+          "command": "transmit.synchronizeContext",
+          "group": "transmit",
+          "when": "isTransmitEnabled && explorerResourceIsFolder"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "transmit.uploadContext",
+          "group": "transmit",
+          "when": "isTransmitEnabled"
+        },
+        {
+          "command": "transmit.downloadContext",
+          "group": "transmit",
+          "when": "isTransmitEnabled"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "publish": "vsce publish && npm publish",
+    "compile": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "node ./node_modules/vscode/bin/test"
+  },
+  "bugs": {
+    "url": "https://github.com/fabiospampinato/vscode-transmit/issues"
+  },
+  "author": {
+    "name": "Fabio Spampinato",
+    "email": "spampinabio@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabiospampinato/vscode-transmit.git"
+  },
+  "engines": {
+    "vscode": "^1.15.0"
+  },
+  "keywords": [
+    "vscode",
+    "transmit",
+    "upload",
+    "download",
+    "synchronize",
+    "vsc",
+    "extension"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "dependencies": {
+    "applescript": "^1.0.0",
+    "lodash": "^4.17.4"
+  },
+  "devDependencies": {
+    "@types/node": "^6.0.40",
+    "tslint": "^4.4.2",
+    "typescript": "~2.2.0",
+    "vscode": "^1.1.4"
+  }
+}
