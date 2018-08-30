@@ -15,55 +15,65 @@
       "type": "object",
       "title": "Transmit - Configuration",
       "properties": {
-        "transmit.favorite": {
-          "type": "string",
-          "description": "Name of the Transmit favorite to use",
-          "default": ""
-        },
-        "transmit.domain": {
-          "type": "string",
-          "description": "Domain to connect to (e.g. example.com)",
-          "default": ""
-        },
-        "transmit.user": {
-          "type": "string",
-          "description": "User used in the connection",
-          "default": "root"
-        },
-        "transmit.protocol": {
-          "type": "string",
-          "enum": [
-            "FTP",
-            "FTP implicit SSL",
-            "FTP TLS SSL",
-            "S3",
-            "SFTP",
-            "WebDAV",
-            "WebDAV HTTPS",
-            "Azure",
-            "B2",
-            "Box",
-            "Cloud Drive",
-            "Cloud Files",
-            "DreamObjects",
-            "Dropbox",
-            "Google Drive",
-            "OneDrive",
-            "OneDrive for Business",
-            "OpenStack Swift"
-          ],
-          "description": "Protocol used in the connection",
-          "default": "SFTP"
-        },
-        "transmit.localRoot": {
-          "type": "string",
-          "description": "Local root path",
-          "default": ""
-        },
-        "transmit.remoteRoot": {
-          "type": "string",
-          "description": "Remote root path",
-          "default": ""
+        "transmit.servers": {
+          "type": "array",
+          "description": "List of servers",
+          "default": [],
+          "items": {
+            "type": "object",
+            "properties": {
+              "favorite": {
+                "type": "string",
+                "description": "Name of the Transmit favorite to use",
+                "default": ""
+              },
+              "domain": {
+                "type": "string",
+                "description": "Domain to connect to (e.g. example.com)",
+                "default": ""
+              },
+              "user": {
+                "type": "string",
+                "description": "User used in the connection",
+                "default": "root"
+              },
+              "protocol": {
+                "type": "string",
+                "enum": [
+                  "FTP",
+                  "FTP implicit SSL",
+                  "FTP TLS SSL",
+                  "S3",
+                  "SFTP",
+                  "WebDAV",
+                  "WebDAV HTTPS",
+                  "Azure",
+                  "B2",
+                  "Box",
+                  "Cloud Drive",
+                  "Cloud Files",
+                  "DreamObjects",
+                  "Dropbox",
+                  "Google Drive",
+                  "OneDrive",
+                  "OneDrive for Business",
+                  "OpenStack Swift"
+                ],
+                "description": "Protocol used in the connection",
+                "default": "SFTP"
+              },
+              "localRoot": {
+                "type": "string",
+                "description": "Local root path",
+                "default": ""
+              },
+              "remoteRoot": {
+                "type": "string",
+                "description": "Remote root path",
+                "default": ""
+              }
+            }
+          }
         }
       }
     },

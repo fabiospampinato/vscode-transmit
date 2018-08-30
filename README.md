@@ -29,16 +29,21 @@ You can also right click a single file/folder for uploading/downloading/synchron
 
 ## Settings
 
-You should provide all of the following settings.
+You should provide at least one server object with all of its properties.
 
 ```js
 {
-  "transmit.favorite": "", // Name of the Transmit favorite to use
-  "transmit.domain": "", // Domain to connect to (e.g. example.com)
-  "transmit.user": "root", // User used in the connection
-  "transmit.protocol": "SFTP", // Protocol used in the connection
-  "transmit.localRoot": "", // Local root path
-  "transmit.remoteRoot": "" // Remote root path
+  "transmit.servers": [ // List of servers
+    { // Server object
+      "favorite": "", // Name of the Transmit favorite to use
+      "domain": "", // Domain to connect to (e.g. example.com)
+      "user": "root", // User used in the connection
+      "protocol": "SFTP", // Protocol used in the connection
+      "localRoot": "", // Local root path
+      "remoteRoot": "" // Remote root path
+    },
+    ...
+  ]
 }
 ```
 

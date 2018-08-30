@@ -4,18 +4,25 @@
 import * as _ from 'lodash';
 import * as applescript from 'applescript';
 import * as vscode from 'vscode';
-import Config from './config';
 import Utils from './utils';
 
 /* COMMANDS */
 
-function command ( command, srcPath = '', dstPath = '' ) {
+async function command ( command, srcPath = '', dstPath = '', server? ) {
 
   const commands = ['connect', 'upload', 'download', 'synchronize'];
 
   if ( !_.includes ( commands, command ) ) return vscode.window.showErrorMessage ( `Unsupported command "${command}"` );
 
-  const {favorite, domain, user, protocol, localRoot, remoteRoot} = Config.get ();
+  if ( !server ) {
+
+    server = await Utils.prompt.server ();
+
+    if ( !server ) return;
+
+  }
+
+  const {favorite, domain, user, protocol, localRoot, remoteRoot} = server;
 
   if ( !favorite && ( !domain || !user || !protocol ) ) return vscode.window.showErrorMessage ( 'You should either set "favorite", or set "domain", "user" and "protocol"' );
 
@@ -129,15 +136,19 @@ function connect () {
 
 }
 
-function upload ( filePath ) {
+async function upload ( filePath ) {
 
   const localPath = filePath || Utils.path.getCurrent ();
 
   if ( !localPath ) return vscode.window.showErrorMessage ( 'You have to open a file first' );
 
-  const remotePath = Utils.path.getRemoteFolderPath ( localPath );
+  const server = await Utils.prompt.server ();
 
-  command ( 'upload', localPath, remotePath );
+  if ( !server ) return;
+
+  const remotePath = Utils.path.getRemoteFolderPath ( server, localPath );
+
+  command ( 'upload', localPath, remotePath, server );
 
 }
 
@@ -147,16 +158,20 @@ function uploadContext ( file ) {
 
 }
 
-function download ( filePath ) {
+async function download ( filePath ) {
 
   const localPath = filePath || Utils.path.getCurrent ();
 
   if ( !localPath ) return vscode.window.showErrorMessage ( 'You have to open a file first' );
 
-  const remotePath = Utils.path.getRemotePath ( localPath ),
+  const server = await Utils.prompt.server ();
+
+  if ( !server ) return;
+
+  const remotePath = Utils.path.getRemotePath ( server, localPath ),
         downloadPath = Utils.path.getDownloadFolderPath ();
 
-  command ( 'download', remotePath, downloadPath );
+  command ( 'download', remotePath, downloadPath, server );
 
 }
 
@@ -166,20 +181,24 @@ function downloadContext ( file ) {
 
 }
 
-async function synchronize ( srcPath, dstPath ) {
+async function synchronize ( srcPath, dstPath, server? ) {
 
   if ( !await Utils.prompt.confirmation ( 'Are you sure you want to start the synchronization?' ) ) return;
 
-  command ( 'synchronize', srcPath, dstPath );
+  command ( 'synchronize', srcPath, dstPath, server );
 
 }
 
-function synchronizeContext ( file ) {
+async function synchronizeContext ( file ) {
 
   const localPath = file.fsPath,
-        remotePath = Utils.path.getRemotePath ( localPath );
+        server = await Utils.prompt.server ();
 
-  synchronize ( localPath, remotePath );
+  if ( !server ) return;
+
+  const remotePath = Utils.path.getRemotePath ( server, localPath );
+
+  synchronize ( localPath, remotePath, server );
 
 }
 

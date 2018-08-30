@@ -46,17 +46,15 @@ const Utils = {
 
     },
 
-    getRemoteFolderPath ( localPath ) {
+    getRemoteFolderPath ( server, localPath ) {
 
-      return path.parse ( Utils.path.getRemotePath ( localPath ) ).dir;
+      return path.parse ( Utils.path.getRemotePath ( server, localPath ) ).dir;
 
     },
 
-    getRemotePath ( localPath ) {
+    getRemotePath ( server, localPath ) {
 
-      const config = Config.get ();
-
-      return `${_.trimEnd ( config.remoteRoot, path.sep )}${path.sep}${_.trimStart ( localPath.slice ( config.localRoot.length ), path.sep )}`;
+      return `${_.trimEnd ( server.remoteRoot, path.sep )}${path.sep}${_.trimStart ( localPath.slice ( server.localRoot.length ), path.sep )}`;
 
     },
 
@@ -84,6 +82,32 @@ const Utils = {
       const option = await vscode.window.showInformationMessage ( message, { title: 'Cancel' }, { title: 'Yes' } );
 
       return option && option.title === 'Yes';
+
+    },
+
+    async server ( servers = Config.get ().servers ) {
+
+      if ( !servers.length ) {
+
+        vscode.window.showErrorMessage ( 'No server defined under the "transmit.servers" setting' );
+
+      } else if ( servers.length === 1 ) {
+
+        return servers[0];
+
+      } else {
+
+        const items = servers.map ( server => ({
+          server,
+          label: server.favorite || server.domain,
+          description: server.favorite ? server.domain : undefined
+        }));
+
+        const item = await vscode.window.showQuickPick ( items, { placeHolder: 'Select a server...' } );
+
+        if ( item ) return item['server'];
+
+      }
 
     }
 

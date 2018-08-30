@@ -10,8 +10,8 @@ import Utils from './utils';
 function activate ( context: vscode.ExtensionContext ) {
 
   function setContext () {
-    const {favorite, domain} = Config.get ();
-    vscode.commands.executeCommand ( 'setContext', 'isTransmitEnabled', favorite || domain );
+    const config = Config.get ();
+    vscode.commands.executeCommand ( 'setContext', 'isTransmitEnabled', !!config.servers.length );
   }
 
   setContext ();
