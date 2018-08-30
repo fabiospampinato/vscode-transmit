@@ -3,7 +3,7 @@
   "displayName": "Transmit",
   "description": "Adds a few commands for interacting with Transmit.",
   "icon": "resources/logo-128x128.png",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "license": "MIT",
   "main": "out/src/extension.js",
   "publisher": "fabiospampinato",
