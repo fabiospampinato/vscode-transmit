@@ -47,7 +47,7 @@ You should provide at least one server object with all of its properties.
 }
 ```
 
-## Related:
+## Related
 
 - **[Open in Transmit](https://marketplace.visualstudio.com/items?itemName=fabiospampinato.vscode-open-in-transmit)**: Adds a few commands for opening the current file or project in Transmit.
 
