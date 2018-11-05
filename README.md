@@ -1,7 +1,7 @@
 # Transmit
 
 <p align="center">
-	<img src="https://raw.githubusercontent.com/fabiospampinato/vscode-transmit/master/resources/logo-128x128.png" alt="Logo">
+	<img src="https://raw.githubusercontent.com/fabiospampinato/vscode-transmit/master/resources/logo.png" width="128" alt="Logo">
 </p>
 
 Adds a few commands for interacting with [Transmit](https://panic.com/transmit).
