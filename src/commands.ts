@@ -1,36 +1,30 @@
 
 /* IMPORT */
 
-import * as _ from 'lodash';
-import * as applescript from 'applescript';
-import * as vscode from 'vscode';
-import Utils from './utils';
+import vscode from 'vscode';
+import {alert, getActiveFilePath, prompt} from 'vscode-extras';
+import {applescript, getDownloadFolderPath, getRemoteFolderPath, getRemotePath, getServer} from './utils';
+import type {Server} from './types';
 
-/* COMMANDS */
+/* MAIN */
 
-async function command ( command, srcPath = '', dstPath = '', server? ) {
+//TODO: Rewrite this more cleanly
 
-  const commands = ['connect', 'upload', 'download', 'synchronize'];
+const command = async ( command: 'connect' | 'upload' | 'download' | 'synchronize', srcPath: string = '', dstPath: string = '', server?: Server ): Promise<void> => {
 
-  if ( !_.includes ( commands, command ) ) return vscode.window.showErrorMessage ( `Unsupported command "${command}"` );
+  server ||= await getServer ();
 
-  if ( !server ) {
-
-    server = await Utils.prompt.server ();
-
-    if ( !server ) return;
-
-  }
+  if ( !server ) return;
 
   const {favorite, domain, user, protocol, localRoot, remoteRoot} = server;
 
-  if ( !favorite && ( !domain || !user || !protocol ) ) return vscode.window.showErrorMessage ( 'You should either set "favorite", or set "domain", "user" and "protocol"' );
+  if ( !favorite && ( !domain || !user || !protocol ) ) return alert.error ( 'You should either set "favorite", or set "domain", "user" and "protocol"' );
 
-  if ( !localRoot || !remoteRoot ) return vscode.window.showErrorMessage ( 'You should always set "localRoot" and "remoteRoot"' );
+  if ( !localRoot || !remoteRoot ) return alert.error ( 'You should always set "localRoot" and "remoteRoot"' );
 
   if ( !srcPath || !dstPath ) srcPath = dstPath = '';
 
-  applescript.execString (`
+  applescript (`
     -- DATA
 
     set website to { fav: "${favorite}", domain: "${domain}", user: "${user}", proto: "${protocol}", localRoot: "${localRoot}", remoteRoot: "${remoteRoot}" }
@@ -128,80 +122,80 @@ async function command ( command, srcPath = '', dstPath = '', server? ) {
     ${ command === 'synchronize' ? 'my synchronize ( website, srcPath, dstPath )' : ''}
   `);
 
-}
+};
 
-function connect () {
+const connect = async (): Promise<void> => {
 
-  command ( 'connect' );
+  await command ( 'connect' );
 
-}
+};
 
-async function upload ( filePath ) {
+const upload = async ( filePath: string ): Promise<void> => {
 
-  const localPath = filePath || Utils.path.getCurrent ();
+  const localPath = filePath || getActiveFilePath ();
 
-  if ( !localPath ) return vscode.window.showErrorMessage ( 'You have to open a file first' );
+  if ( !localPath ) return alert.error ( 'You have to open a file first' );
 
-  const server = await Utils.prompt.server ();
-
-  if ( !server ) return;
-
-  const remotePath = Utils.path.getRemoteFolderPath ( server, localPath );
-
-  command ( 'upload', localPath, remotePath, server );
-
-}
-
-function uploadContext ( file ) {
-
-  upload ( file.fsPath );
-
-}
-
-async function download ( filePath ) {
-
-  const localPath = filePath || Utils.path.getCurrent ();
-
-  if ( !localPath ) return vscode.window.showErrorMessage ( 'You have to open a file first' );
-
-  const server = await Utils.prompt.server ();
+  const server = await getServer ();
 
   if ( !server ) return;
 
-  const remotePath = Utils.path.getRemotePath ( server, localPath ),
-        downloadPath = Utils.path.getDownloadFolderPath ();
+  const remotePath = getRemoteFolderPath ( server, localPath );
 
-  command ( 'download', remotePath, downloadPath, server );
+  await command ( 'upload', localPath, remotePath, server );
 
-}
+};
 
-function downloadContext ( file ) {
+const uploadFile = async ( file: vscode.Uri ): Promise<void> => {
 
-  download ( file.fsPath );
+  await upload ( file.fsPath );
 
-}
+};
 
-async function synchronize ( srcPath, dstPath, server? ) {
+const download = async ( filePath: string ): Promise<void> => {
 
-  if ( !await Utils.prompt.confirmation ( 'Are you sure you want to start the synchronization?' ) ) return;
+  const localPath = filePath || getActiveFilePath ();
 
-  command ( 'synchronize', srcPath, dstPath, server );
+  if ( !localPath ) return alert.error ( 'You have to open a file first' );
 
-}
-
-async function synchronizeContext ( file ) {
-
-  const localPath = file.fsPath,
-        server = await Utils.prompt.server ();
+  const server = await getServer ();
 
   if ( !server ) return;
 
-  const remotePath = Utils.path.getRemotePath ( server, localPath );
+  const remotePath = getRemotePath ( server, localPath );
+  const downloadPath = getDownloadFolderPath ();
 
-  synchronize ( localPath, remotePath, server );
+  await command ( 'download', remotePath, downloadPath, server );
 
-}
+};
+
+const downloadFile = async ( file: vscode.Uri ): Promise<void> => {
+
+  await download ( file.fsPath );
+
+};
+
+const synchronize = async ( srcPath: string, dstPath: string, server?: Server ): Promise<void> => {
+
+  if ( !await prompt.boolean ( 'Are you sure you want to start the synchronization?' ) ) return;
+
+  await command ( 'synchronize', srcPath, dstPath, server );
+
+};
+
+const synchronizeFile = async ( file: vscode.Uri ): Promise<void> => {
+
+  const localPath = file.fsPath;
+  const server = await getServer ();
+
+  if ( !server ) return;
+
+  const remotePath = getRemotePath ( server, localPath );
+
+  await synchronize ( localPath, remotePath, server );
+
+};
 
 /* EXPORT */
 
-export {connect, upload, uploadContext, download, downloadContext, synchronize, synchronizeContext};
+export {connect, upload, uploadFile, download, downloadFile, synchronize, synchronizeFile};

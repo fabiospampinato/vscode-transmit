@@ -1,120 +1,87 @@
 
 /* IMPORT */
 
-import * as _ from 'lodash';
-import * as os from 'os';
-import * as path from 'path';
-import * as vscode from 'vscode';
-import Config from './config';
-import * as Commands from './commands';
+import os from 'node:os';
+import path from 'node:path';
+import {alert, exec, getConfig, prompt} from 'vscode-extras';
+import type {Options, Server} from './types';
 
-/* UTILS */
+/* MAIN */
 
-const Utils = {
+const applescript = async ( script: string ): Promise<void> => {
 
-  initCommands ( context: vscode.ExtensionContext ) {
+  await exec ( 'osascript', ['-e', script] );
 
-    const {commands} = vscode.extensions.getExtension ( 'fabiospampinato.vscode-transmit' ).packageJSON.contributes;
+};
 
-    commands.forEach ( ({ command, title }) => {
+const getDownloadFolderPath = (): string => {
 
-      const commandName = _.last ( command.split ( '.' ) ) as string,
-            handler = Commands[commandName],
-            disposable = vscode.commands.registerCommand ( command, handler );
+  return path.join ( os.homedir (), 'Downloads' );
 
-      context.subscriptions.push ( disposable );
+};
 
-    });
+const getDownloadPath = ( remotePath: string ): string => {
 
-    return Commands;
+  const folderPath = getDownloadFolderPath ();
+  const fileName = path.parse ( remotePath ).base;
 
-  },
+  return `${folderPath}${path.sep}${fileName}`;
 
-  path: {
+};
 
-    getCurrent () {
+const getRemoteFolderPath = ( server: Server, localPath: string ): string => {
 
-      const editor = vscode.window.activeTextEditor;
+  return path.parse ( getRemotePath ( server, localPath ) ).dir;
 
-      if ( !editor ) return '';
+};
 
-      const filePath = editor.document.uri.fsPath;
+const getRemotePath = ( server: Server, localPath: string ): string => {
 
-      if ( !path.isAbsolute ( filePath ) ) return '';
+  return `${server.remoteRoot.replace ( /[\\\/]+$/, '' )}${path.sep}${localPath.slice ( server.localRoot.length ).replace ( /^[\\\/]+/, '' )}`;
 
-      return filePath;
+};
 
-    },
+const getOptions = (): Options => {
 
-    getRemoteFolderPath ( server, localPath ) {
+  const config = getConfig ( 'transmit' );
+  const servers = isArray ( config?.servers ) ? config.servers as Server[] : []; //TODO: Actually type-check this
 
-      return path.parse ( Utils.path.getRemotePath ( server, localPath ) ).dir;
+  return { servers };
 
-    },
+};
 
-    getRemotePath ( server, localPath ) {
+const getServers = (): Server[] => {
 
-      return `${_.trimEnd ( server.remoteRoot, path.sep )}${path.sep}${_.trimStart ( localPath.slice ( server.localRoot.length ), path.sep )}`;
+  return getOptions ().servers;
 
-    },
+};
 
-    getDownloadFolderPath () {
+const getServer = async (): Promise<Server | undefined> => {
 
-      return path.join ( os.homedir (), 'Downloads' );
+  const servers = getServers ();
 
-    },
+  if ( !servers.length ) return alert.error ( 'No server defined under the "transmit.servers" setting' );
 
-    getDownloadPath ( remotePath ) {
+  if ( servers.length === 1 ) return servers[0];
 
-      const folderPath = Utils.path.getDownloadFolderPath (),
-            fileName = path.parse ( remotePath ).base;
+  const items = servers.map ( server => ({
+    server,
+    label: server.favorite || server.domain,
+    description: server.favorite ? server.domain : undefined
+  }));
 
-      return `${folderPath}${path.sep}${fileName}`;
+  const item = await prompt.select ( 'Select a server...', items );
 
-    }
+  return item?.server;
 
-  },
+};
 
-  prompt: {
+const isArray = ( value: unknown ): value is unknown[] => {
 
-    async confirmation ( message = 'Are you sure you want to perform this action?' ) {
-
-      const option = await vscode.window.showInformationMessage ( message, { title: 'Cancel' }, { title: 'Yes' } );
-
-      return option && option.title === 'Yes';
-
-    },
-
-    async server ( servers = Config.get ().servers ) {
-
-      if ( !servers.length ) {
-
-        vscode.window.showErrorMessage ( 'No server defined under the "transmit.servers" setting' );
-
-      } else if ( servers.length === 1 ) {
-
-        return servers[0];
-
-      } else {
-
-        const items = servers.map ( server => ({
-          server,
-          label: server.favorite || server.domain,
-          description: server.favorite ? server.domain : undefined
-        }));
-
-        const item = await vscode.window.showQuickPick ( items, { placeHolder: 'Select a server...' } );
-
-        if ( item ) return item['server'];
-
-      }
-
-    }
-
-  }
+  return Array.isArray ( value );
 
 };
 
 /* EXPORT */
 
-export default Utils;
+export {applescript, getDownloadFolderPath, getDownloadPath, getRemoteFolderPath, getRemotePath, getOptions, getServers, getServer, isArray};

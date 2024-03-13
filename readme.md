@@ -47,16 +47,6 @@ You should provide at least one server object with all of its properties.
 }
 ```
 
-## Related
-
-- **[Open in Transmit](https://marketplace.visualstudio.com/items?itemName=fabiospampinato.vscode-open-in-transmit)**: Adds a few commands for opening the current file or project in Transmit.
-
-## Contributing
-
-If you found a problem, or have a feature request, please open an [issue](https://github.com/fabiospampinato/vscode-transmit/issues) about it.
-
-If you want to make a pull request you can debug the extension using [Debug Launcher](https://marketplace.visualstudio.com/items?itemName=fabiospampinato.vscode-debug-launcher).
-
 ## License
 
 MIT © Fabio Spampinato
